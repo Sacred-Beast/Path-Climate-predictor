@@ -1,0 +1,163 @@
+.home {
+  padding: 1.5rem;
+}
+
+.input-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.location-group {
+  margin-bottom: 1.5rem;
+}
+
+.location-group h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-primary, .btn-secondary, .btn-example {
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  margin-bottom: 0.75rem;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+  background: #10b981;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.btn-secondary:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.examples {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.examples h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-example {
+  background: #f3f4f6;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-example:hover {
+  background: #e5e7eb;
+}
+
+.recommendation-panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f0f9ff;
+  border-radius: 0.5rem;
+  border: 1px solid #bfdbfe;
+}
+
+.recommendation-panel h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 1rem;
+}
+
+.recommendation-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.rec-time {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.rec-risk {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.rec-risk.safe {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rec-risk.moderate {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.rec-risk.risky {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.rec-risk.dangerous {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.rec-score {
+  font-size: 0.875rem;
+  color: #6b7280;
+}

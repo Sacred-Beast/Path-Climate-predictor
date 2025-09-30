@@ -1,0 +1,107 @@
+.alerts-panel {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.alerts-panel h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.no-alerts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  background: #f0fdf4;
+  border-radius: 0.5rem;
+  border: 1px solid #bbf7d0;
+}
+
+.no-alerts .alert-icon {
+  font-size: 3rem;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+
+.no-alerts p {
+  color: #065f46;
+  font-size: 0.875rem;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.alert-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border-left: 4px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alert-card.risky {
+  border-left-color: #f97316;
+  background: #fff7ed;
+}
+
+.alert-card.dangerous {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.alert-severity {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.alert-card.risky .alert-severity {
+  background: #f97316;
+  color: white;
+}
+
+.alert-card.dangerous .alert-severity {
+  background: #ef4444;
+  color: white;
+}
+
+.alert-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.alert-message {
+  font-size: 0.875rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.alert-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.alert-detail {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: white;
+  border-radius: 0.25rem;
+  color: #4b5563;
+}
