@@ -3,66 +3,117 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import Dict, List
 import numpy as np
+import logging
+
+logging.getLogger('prophet').setLevel(logging.WARNING)
+logging.getLogger('cmdstanpy').setLevel(logging.WARNING)
 
 class WeatherPredictor:
     @staticmethod
-    def predict_weather(historical_data: List[Dict], target_time: datetime) -> Dict:
+    def predict_weather_with_prophet(hourly_data: Dict, target_time: datetime, metric: str) -> float:
         """
-        Use Prophet to predict weather at target time
-        For production use, this would train on historical data
-        For now, we'll use a simplified approach based on current forecast trends
+        Use Prophet to predict a specific weather metric at target time
+        hourly_data: Dictionary with 'time' and metric arrays from Open-Meteo
+        target_time: When to predict
+        metric: Which metric to predict (temperature_2m, precipitation, windspeed_10m)
         """
-        if not historical_data:
+        try:
+            if not hourly_data or metric not in hourly_data:
+                return None
+            
+            times = hourly_data.get("time", [])
+            values = hourly_data.get(metric, [])
+            
+            if len(times) < 10 or len(values) < 10:
+                return values[0] if values else None
+            
+            df = pd.DataFrame({
+                'ds': pd.to_datetime(times),
+                'y': values
+            })
+            
+            df = df.dropna()
+            if len(df) < 10:
+                return values[0] if values else None
+            
+            model = Prophet(
+                daily_seasonality=True,
+                weekly_seasonality=False,
+                yearly_seasonality=False,
+                seasonality_mode='additive'
+            )
+            model.fit(df)
+            
+            future = pd.DataFrame({'ds': [pd.to_datetime(target_time)]})
+            forecast = model.predict(future)
+            
+            predicted_value = forecast['yhat'].iloc[0]
+            return max(0, predicted_value)
+            
+        except Exception as e:
+            print(f"Prophet prediction error for {metric}: {e}")
+            if hourly_data and metric in hourly_data:
+                values = hourly_data[metric]
+                return values[0] if values else None
+            return None
+    
+    @staticmethod
+    def predict_weather(weather_data: Dict, target_time: datetime) -> Dict:
+        """
+        Use Prophet to predict weather at target time based on forecast data
+        weather_data: Full weather response from Open-Meteo with hourly data
+        target_time: When to predict weather conditions
+        """
+        if not weather_data or "hourly" not in weather_data:
             return {
                 "temperature": None,
                 "precipitation": None,
                 "windspeed": None,
+                "weathercode": 0,
                 "confidence": 0.0
             }
         
-        latest = historical_data[-1]
+        hourly = weather_data["hourly"]
         
-        if len(historical_data) < 2:
+        try:
+            temperature = WeatherPredictor.predict_weather_with_prophet(
+                hourly, target_time, "temperature_2m"
+            )
+            precipitation = WeatherPredictor.predict_weather_with_prophet(
+                hourly, target_time, "precipitation"
+            )
+            windspeed = WeatherPredictor.predict_weather_with_prophet(
+                hourly, target_time, "windspeed_10m"
+            )
+            
+            weathercodes = hourly.get("weathercode", [])
+            weathercode = weathercodes[0] if weathercodes else 0
+            
+            confidence = 0.8
+            
             return {
-                "temperature": latest.get("temperature"),
-                "precipitation": latest.get("precipitation"),
-                "windspeed": latest.get("windspeed"),
-                "weathercode": latest.get("weathercode"),
+                "temperature": round(temperature, 1) if temperature is not None else None,
+                "precipitation": round(precipitation, 2) if precipitation is not None else 0.0,
+                "windspeed": round(windspeed, 1) if windspeed is not None else None,
+                "weathercode": int(weathercode),
+                "confidence": confidence
+            }
+        except Exception as e:
+            print(f"Error in weather prediction: {e}")
+            times = hourly.get("time", [])
+            if not times:
+                return {
+                    "temperature": None,
+                    "precipitation": 0.0,
+                    "windspeed": None,
+                    "weathercode": 0,
+                    "confidence": 0.0
+                }
+            
+            return {
+                "temperature": hourly.get("temperature_2m", [None])[0],
+                "precipitation": hourly.get("precipitation", [0.0])[0],
+                "windspeed": hourly.get("windspeed_10m", [None])[0],
+                "weathercode": hourly.get("weathercode", [0])[0],
                 "confidence": 0.5
             }
-        
-        temp_values = [d.get("temperature", 0) for d in historical_data if d.get("temperature") is not None]
-        precip_values = [d.get("precipitation", 0) for d in historical_data if d.get("precipitation") is not None]
-        wind_values = [d.get("windspeed", 0) for d in historical_data if d.get("windspeed") is not None]
-        
-        temp_trend = np.mean(temp_values) if temp_values else latest.get("temperature", 15)
-        precip_trend = np.mean(precip_values) if precip_values else latest.get("precipitation", 0)
-        wind_trend = np.mean(wind_values) if wind_values else latest.get("windspeed", 10)
-        
-        return {
-            "temperature": round(temp_trend, 1),
-            "precipitation": round(precip_trend, 2),
-            "windspeed": round(wind_trend, 1),
-            "weathercode": latest.get("weathercode", 0),
-            "confidence": 0.7 if len(historical_data) >= 3 else 0.5
-        }
-    
-    @staticmethod
-    def train_prophet_model(df: pd.DataFrame, column: str) -> Prophet:
-        """Train Prophet model on historical data"""
-        if df.empty or column not in df.columns:
-            return None
-        
-        prophet_df = pd.DataFrame({
-            'ds': df['ds'],
-            'y': df[column]
-        })
-        
-        model = Prophet(
-            daily_seasonality=True,
-            weekly_seasonality=True,
-            yearly_seasonality=False
-        )
-        
-        model.fit(prophet_df)
-        return model

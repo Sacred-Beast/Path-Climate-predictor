@@ -8,15 +8,17 @@ class OpenRouteServiceAPI:
     @staticmethod
     def get_route(start_coords: Tuple[float, float], end_coords: Tuple[float, float], api_key: str = None) -> Dict:
         """
-        Get route from OpenRouteService
+        Get route from OpenRouteService using GeoJSON format
         start_coords: (longitude, latitude)
         end_coords: (longitude, latitude)
         """
         if api_key is None:
-            api_key = os.getenv("OPENROUTE_API_KEY", "5b3ce3597851110001cf62489e8f7e0c58c04c4793d9e7dc1c0e7c17")
+            api_key = os.getenv("OPENROUTE_API_KEY")
+            if not api_key:
+                raise ValueError("OPENROUTE_API_KEY environment variable not set. Please set it with your API key from https://openrouteservice.org/")
         
         headers = {
-            'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+            'Accept': 'application/json, application/geo+json',
             'Authorization': api_key,
             'Content-Type': 'application/json; charset=utf-8'
         }
@@ -29,17 +31,26 @@ class OpenRouteServiceAPI:
         }
         
         try:
-            response = requests.post(OpenRouteServiceAPI.BASE_URL, json=body, headers=headers, timeout=15)
+            response = requests.post(OpenRouteServiceAPI.BASE_URL + "/geojson", json=body, headers=headers, timeout=15)
             response.raise_for_status()
             data = response.json()
             
-            if "routes" in data and len(data["routes"]) > 0:
-                route = data["routes"][0]
+            if "features" in data and len(data["features"]) > 0:
+                feature = data["features"][0]
+                geometry = feature.get("geometry", {})
+                properties = feature.get("properties", {})
+                summary = properties.get("summary", {})
+                
+                coordinates = geometry.get("coordinates", [])
+                if not coordinates:
+                    print("No coordinates in response")
+                    return None
+                
                 return {
-                    "geometry": route.get("geometry"),
-                    "distance": route["summary"]["distance"],
-                    "duration": route["summary"]["duration"],
-                    "coordinates": route["geometry"]["coordinates"] if "geometry" in route else []
+                    "geometry": geometry,
+                    "distance": summary.get("distance", 0),
+                    "duration": summary.get("duration", 0),
+                    "coordinates": coordinates
                 }
             return None
         except Exception as e:

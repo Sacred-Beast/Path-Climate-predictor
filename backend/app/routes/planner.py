@@ -52,10 +52,9 @@ async def plan_route(request: RouteRequest):
             segment_eta = datetime.fromisoformat(segment["eta"])
             
             weather_data = OpenMeteoAPI.fetch_weather(center_lat, center_lon, segment_eta)
-            weather = OpenMeteoAPI.get_weather_at_time(weather_data, segment_eta)
             
-            if weather:
-                predicted = WeatherPredictor.predict_weather([weather], segment_eta)
+            if weather_data:
+                predicted = WeatherPredictor.predict_weather(weather_data, segment_eta)
             else:
                 predicted = {
                     "temperature": None,
