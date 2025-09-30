@@ -48,7 +48,10 @@ class WeatherPredictor:
             forecast = model.predict(future)
             
             predicted_value = forecast['yhat'].iloc[0]
-            return max(0, predicted_value)
+            
+            if metric in ['precipitation', 'windspeed_10m']:
+                return max(0, predicted_value)
+            return predicted_value
             
         except Exception as e:
             print(f"Prophet prediction error for {metric}: {e}")
