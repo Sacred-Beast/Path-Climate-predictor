@@ -47,3 +47,15 @@ export const getRecommendedDeparture = async (startLat, startLon, endLat, endLon
     throw error;
   }
 };
+
+export const searchLocations = async (query) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/geocoding/search`, {
+      params: { q: query }
+    });
+    return response.data.results;
+  } catch (error) {
+    console.error('Error searching locations:', error);
+    return [];
+  }
+};
