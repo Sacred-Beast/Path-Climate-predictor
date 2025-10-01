@@ -14,9 +14,14 @@ class OpenRouteServiceAPI:
         """
         if api_key is None:
             api_key = os.getenv("OPENROUTE_API_KEY")
+            if api_key:
+                api_key = api_key.strip()
+                if (api_key.startswith('"') and api_key.endswith('"')) or (api_key.startswith("'") and api_key.endswith("'")):
+                    api_key = api_key[1:-1]
             if not api_key:
-                raise ValueError("OPENROUTE_API_KEY environment variable not set. Please set it with your API key from https://openrouteservice.org/")
-        
+                raise ValueError(
+                    "OPENROUTE_API_KEY environment variable not set. Please set it with your API key from https://openrouteservice.org/ or place it in backend/.env"
+                )        
         headers = {
             'Accept': 'application/json, application/geo+json',
             'Authorization': api_key,
