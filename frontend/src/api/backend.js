@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8000';
 
 // Planner can be slow (Stan / cmdstan processing). Increase timeout to 60s.
-const api = axios.create({ baseURL: API_BASE_URL, timeout: 9000000000 });
+const api = axios.create({ baseURL: API_BASE_URL, timeout: 9000000000000000 });
 
 const cache = new Map();
 
