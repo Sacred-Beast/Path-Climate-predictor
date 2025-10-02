@@ -148,9 +148,11 @@ function Home() {
     setLoading(true);
     try {
       const data = await getRecommendedDeparture(startCoords.lat, startCoords.lon, endCoords.lat, endCoords.lon, 12);
+      console.log('Recommendation response:', data);
       setRecommendation(data);
       setSuccess('Recommendation calculated');
     } catch (err) {
+      console.error('Recommendation error:', err);
       setError(err?.toString() || 'Failed to get recommendation');
     } finally {
       setLoading(false);
@@ -221,6 +223,34 @@ function Home() {
           <div className={styles.loading} role="status">
             <Skeleton height={16} style={{ marginBottom: 8 }} />
             <Skeleton height={14} width="60%" />
+          </div>
+        )}
+        {recommendation && (
+          <div className={styles.recommendation}>
+            <h3>Recommendation</h3>
+            {recommendation.best_departure ? (
+              <div className={styles.bestDeparture}>
+                <div><strong>Best departure:</strong></div>
+                <div>Time: {new Date(recommendation.best_departure.departure_time).toLocaleString()}</div>
+                <div>Average risk: {recommendation.best_departure.average_risk}</div>
+                <div>Risk level: {recommendation.best_departure.risk_level}</div>
+              </div>
+            ) : (
+              <div>No best departure found.</div>
+            )}
+
+            {Array.isArray(recommendation.all_recommendations) && recommendation.all_recommendations.length > 0 && (
+              <details className={styles.recommendationDetails}>
+                <summary>All recommendations ({recommendation.all_recommendations.length})</summary>
+                <ul>
+                  {recommendation.all_recommendations.map((r, idx) => (
+                    <li key={idx}>
+                      {new Date(r.departure_time).toLocaleString()} — avg risk: {r.average_risk}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         )}
       </Card>
