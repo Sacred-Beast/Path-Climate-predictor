@@ -5,9 +5,11 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
     "react-leaflet": "^4.2.1",
     "leaflet": "^1.9.4",
     "axios": "^1.6.2",
+    "clsx": "^2.0.0",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
@@ -15,7 +17,7 @@
     "vite": "^5.0.5"
   },
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 5000",
+  "dev": "vite --host 0.0.0.0 --port 5000 --strictPort",
     "build": "vite build",
     "preview": "vite preview"
   }

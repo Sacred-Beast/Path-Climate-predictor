@@ -6,12 +6,12 @@
 
 .map-legend {
   position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  background: white;
-  padding: 1rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--card-bg);
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.08);
   z-index: 1000;
 }
 
@@ -25,6 +25,7 @@
 .legend-item {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -33,13 +34,14 @@
 }
 
 .legend-color {
-  width: 24px;
-  height: 4px;
-  border-radius: 2px;
-  margin-right: 0.5rem;
+  width: 28px;
+  height: 6px;
+  border-radius: 3px;
 }
 
 .legend-item span {
-  font-size: 0.75rem;
-  color: #4b5563;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
+
+.map-view { border-radius: 0.5rem; overflow: hidden; }

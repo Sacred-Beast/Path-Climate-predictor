@@ -1,20 +1,20 @@
 .alerts-panel {
-  padding: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
 }
 
 .alerts-panel h3 {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.75rem;
 }
 
 .no-alerts {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 1.25rem;
   text-align: center;
   background: #f0fdf4;
   border-radius: 0.5rem;
@@ -22,7 +22,7 @@
 }
 
 .no-alerts .alert-icon {
-  font-size: 3rem;
+  font-size: 2.25rem;
   color: #10b981;
   margin-bottom: 0.5rem;
 }
@@ -35,62 +35,42 @@
 .alerts-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 .alert-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 0.9rem;
   border-left: 4px solid;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+  display: flex;
+  flex-direction: column;
 }
 
-.alert-card.risky {
-  border-left-color: #f97316;
-  background: #fff7ed;
-}
-
-.alert-card.dangerous {
-  border-left-color: #ef4444;
-  background: #fef2f2;
-}
+.alert-card.risky { border-left-color: #f97316; background: rgba(249,115,22,0.06); }
+.alert-card.dangerous { border-left-color: #ef4444; background: rgba(239,68,68,0.06); }
 
 .alert-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .alert-severity {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
   border-radius: 0.25rem;
 }
 
-.alert-card.risky .alert-severity {
-  background: #f97316;
-  color: white;
-}
+.alert-card.risky .alert-severity { background: #f97316; color: var(--card-bg); }
+.alert-card.dangerous .alert-severity { background: #ef4444; color: var(--card-bg); }
 
-.alert-card.dangerous .alert-severity {
-  background: #ef4444;
-  color: white;
-}
+.alert-time { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
 
-.alert-time {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.alert-message {
-  font-size: 0.875rem;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-}
+.alert-message { font-size: 0.9rem; color: var(--text); margin-bottom: 0.35rem; }
 
 .alert-details {
   display: flex;
@@ -98,10 +78,4 @@
   gap: 0.5rem;
 }
 
-.alert-detail {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  background: white;
-  border-radius: 0.25rem;
-  color: #4b5563;
-}
+.alert-detail { font-size: 0.78rem; padding: 0.25rem 0.5rem; background: rgba(0,0,0,0.03); border-radius: 0.25rem; color: var(--muted); }

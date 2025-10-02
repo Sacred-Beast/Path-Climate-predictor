@@ -1,21 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { planRoute, getRecommendedDeparture, searchLocations } from '../api/backend';
-import './Home.css';
+import MapView from '../components/MapView';
+import AlertsPanel from '../components/AlertsPanel';
+import Timeline from '../components/Timeline';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import Autocomplete from '../components/Autocomplete';
+import Skeleton from '../components/Skeleton';
+import styles from './Home.module.css';
 
-function Home({ onRouteData, onLoading, onError }) {
+function Home() {
   const [startLocation, setStartLocation] = useState('');
   const [startCoords, setStartCoords] = useState(null);
   const [startSuggestions, setStartSuggestions] = useState([]);
   const [showStartSuggestions, setShowStartSuggestions] = useState(false);
-  
+  const [startLoading, setStartLoading] = useState(false);
+
   const [endLocation, setEndLocation] = useState('');
   const [endCoords, setEndCoords] = useState(null);
   const [endSuggestions, setEndSuggestions] = useState([]);
   const [showEndSuggestions, setShowEndSuggestions] = useState(false);
-  
+  const [endLoading, setEndLoading] = useState(false);
+
   const [departureTime, setDepartureTime] = useState('');
   const [recommendation, setRecommendation] = useState(null);
-  
+
+  const [routeData, setRouteData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   const startRef = useRef(null);
   const endRef = useRef(null);
 
@@ -33,94 +48,112 @@ function Home({ onRouteData, onLoading, onError }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleStartLocationChange = async (value) => {
+  // debounced start search
+  const startTimer = useRef(null);
+  const handleStartLocationChange = (value) => {
     setStartLocation(value);
     setStartCoords(null);
-    
+    setError('');
+    if (startTimer.current) clearTimeout(startTimer.current);
     if (value.length >= 2) {
-      const results = await searchLocations(value);
-      setStartSuggestions(results);
-      setShowStartSuggestions(true);
+      setStartLoading(true);
+      startTimer.current = setTimeout(async () => {
+        try {
+          const results = await searchLocations(value);
+          setStartSuggestions(results);
+          setShowStartSuggestions(true);
+        } catch (err) {
+          const message = err?.message || String(err) || 'Failed to fetch start suggestions';
+          console.error('Start suggestions error:', err);
+          setError(`Failed to fetch start suggestions: ${message}`);
+        } finally {
+          setStartLoading(false);
+        }
+      }, 300);
     } else {
       setStartSuggestions([]);
       setShowStartSuggestions(false);
+      setStartLoading(false);
     }
   };
 
-  const handleEndLocationChange = async (value) => {
+  // debounced end search
+  const endTimer = useRef(null);
+  const handleEndLocationChange = (value) => {
     setEndLocation(value);
     setEndCoords(null);
-    
+    setError('');
+    if (endTimer.current) clearTimeout(endTimer.current);
     if (value.length >= 2) {
-      const results = await searchLocations(value);
-      setEndSuggestions(results);
-      setShowEndSuggestions(true);
+      setEndLoading(true);
+      endTimer.current = setTimeout(async () => {
+        try {
+          const results = await searchLocations(value);
+          setEndSuggestions(results);
+          setShowEndSuggestions(true);
+        } catch (err) {
+          const message = err?.message || String(err) || 'Failed to fetch destination suggestions';
+          console.error('End suggestions error:', err);
+          setError(`Failed to fetch destination suggestions: ${message}`);
+        } finally {
+          setEndLoading(false);
+        }
+      }, 300);
     } else {
       setEndSuggestions([]);
       setShowEndSuggestions(false);
+      setEndLoading(false);
     }
   };
 
-  const selectStartLocation = (suggestion) => {
-    setStartLocation(suggestion.display_name);
-    setStartCoords({ lat: suggestion.lat, lon: suggestion.lon });
+  const selectStartLocation = (s) => {
+    setStartLocation(s.display_name);
+    setStartCoords({ lat: s.lat, lon: s.lon });
     setShowStartSuggestions(false);
   };
 
-  const selectEndLocation = (suggestion) => {
-    setEndLocation(suggestion.display_name);
-    setEndCoords({ lat: suggestion.lat, lon: suggestion.lon });
+  const selectEndLocation = (s) => {
+    setEndLocation(s.display_name);
+    setEndCoords({ lat: s.lat, lon: s.lon });
     setShowEndSuggestions(false);
   };
 
   const handlePlanRoute = async (e) => {
-    e.preventDefault();
-    
+    e?.preventDefault();
+    setError('');
+    setSuccess('');
     if (!startCoords || !endCoords) {
-      onError('Please select valid start and destination locations from the suggestions');
+      setError('Please select valid start and destination locations.');
       return;
     }
-
-    onLoading(true);
-    setRecommendation(null);
-
+    setLoading(true);
     try {
-      const data = await planRoute(
-        startCoords.lat,
-        startCoords.lon,
-        endCoords.lat,
-        endCoords.lon,
-        departureTime || null
-      );
-      onRouteData(data);
-    } catch (error) {
-      onError('Failed to plan route. Please try again.');
+      const data = await planRoute(startCoords.lat, startCoords.lon, endCoords.lat, endCoords.lon, departureTime || null);
+      setRouteData(data);
+      setSuccess('Route planned successfully');
+    } catch (err) {
+      setError(err?.toString() || 'Route planning failed');
     } finally {
-      onLoading(false);
+      setLoading(false);
     }
   };
 
   const handleGetRecommendation = async () => {
+    setError('');
+    setSuccess('');
     if (!startCoords || !endCoords) {
-      onError('Please select valid start and destination locations');
+      setError('Please select valid start and destination locations.');
       return;
     }
-
-    onLoading(true);
-
+    setLoading(true);
     try {
-      const data = await getRecommendedDeparture(
-        startCoords.lat,
-        startCoords.lon,
-        endCoords.lat,
-        endCoords.lon,
-        12
-      );
+      const data = await getRecommendedDeparture(startCoords.lat, startCoords.lon, endCoords.lat, endCoords.lon, 12);
       setRecommendation(data);
-    } catch (error) {
-      onError('Failed to get recommendations. Please try again.');
+      setSuccess('Recommendation calculated');
+    } catch (err) {
+      setError(err?.toString() || 'Failed to get recommendation');
     } finally {
-      onLoading(false);
+      setLoading(false);
     }
   };
 
@@ -132,132 +165,73 @@ function Home({ onRouteData, onLoading, onError }) {
   };
 
   return (
-    <div className="home">
-      <div className="input-section">
+    <div className={styles.home}>
+      <div className={styles.mapAndAlerts}>
+        <div className={styles.sidebar}>
+          <Card className={`${styles.inputSection} ${'card--p'}`}>
         <h2>Plan Your Route</h2>
-        
-        <form onSubmit={handlePlanRoute}>
-          <div className="location-group" ref={startRef}>
-            <h3>Start Location</h3>
-            <input
-              type="text"
-              placeholder="Type a city, address, or landmark..."
+        <form onSubmit={handlePlanRoute} aria-label="route-form">
+          <div className={styles.locationGroup} ref={startRef}>
+            <label htmlFor="start">Start Location</label>
+            <Autocomplete
+              id="start"
               value={startLocation}
-              onChange={(e) => handleStartLocationChange(e.target.value)}
-              onFocus={() => startSuggestions.length > 0 && setShowStartSuggestions(true)}
+              onChange={handleStartLocationChange}
+              onSelect={selectStartLocation}
+              placeholder="City, address, or landmark"
+              suggestions={startSuggestions}
+              showSuggestions={showStartSuggestions}
+              setShowSuggestions={setShowStartSuggestions}
+              loading={startLoading}
             />
-            {showStartSuggestions && startSuggestions.length > 0 && (
-              <div className="suggestions-dropdown">
-                {startSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="suggestion-item"
-                    onClick={() => selectStartLocation(suggestion)}
-                  >
-                    <div className="suggestion-name">{suggestion.display_name}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {startCoords && (
-              <div className="coords-display">
-                Selected: {startCoords.lat.toFixed(4)}, {startCoords.lon.toFixed(4)}
-              </div>
-            )}
+            {startCoords && <div className={styles.coordsDisplay}>Selected: {Number(startCoords.lat).toFixed(4)}, {Number(startCoords.lon).toFixed(4)}</div>}
           </div>
 
-          <div className="location-group" ref={endRef}>
-            <h3>Destination</h3>
-            <input
-              type="text"
-              placeholder="Type a city, address, or landmark..."
+          <div className={styles.locationGroup} ref={endRef}>
+            <label htmlFor="end">Destination</label>
+            <Autocomplete
+              id="end"
               value={endLocation}
-              onChange={(e) => handleEndLocationChange(e.target.value)}
-              onFocus={() => endSuggestions.length > 0 && setShowEndSuggestions(true)}
+              onChange={handleEndLocationChange}
+              onSelect={selectEndLocation}
+              placeholder="City, address, or landmark"
+              suggestions={endSuggestions}
+              showSuggestions={showEndSuggestions}
+              setShowSuggestions={setShowEndSuggestions}
+              loading={endLoading}
             />
-            {showEndSuggestions && endSuggestions.length > 0 && (
-              <div className="suggestions-dropdown">
-                {endSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="suggestion-item"
-                    onClick={() => selectEndLocation(suggestion)}
-                  >
-                    <div className="suggestion-name">{suggestion.display_name}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {endCoords && (
-              <div className="coords-display">
-                Selected: {endCoords.lat.toFixed(4)}, {endCoords.lon.toFixed(4)}
-              </div>
-            )}
+            {endCoords && <div className={styles.coordsDisplay}>Selected: {Number(endCoords.lat).toFixed(4)}, {Number(endCoords.lon).toFixed(4)}</div>}
           </div>
 
-          <div className="location-group">
-            <h3>Departure Time (Optional)</h3>
-            <input
-              type="datetime-local"
-              value={departureTime}
-              onChange={(e) => setDepartureTime(e.target.value)}
-            />
+          <div className={styles.locationGroup}>
+            <label htmlFor="departure">Departure Time (Optional)</label>
+            <Input id="departure" type="datetime-local" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} />
           </div>
 
-          <button type="submit" className="btn-primary">
-            Plan Route
-          </button>
+          <Button type="submit" className={styles.btnWhite} loading={loading}>Plan Route</Button>
         </form>
 
-        <button onClick={handleGetRecommendation} className="btn-secondary">
-          Get Best Departure Time
-        </button>
+        <Button onClick={handleGetRecommendation} className={styles.btnSecondary} loading={loading}>Get Best Departure Time</Button>
 
-        <div className="examples">
-          <h3>Example Routes</h3>
-          <button onClick={() => useExampleRoute({
-            startName: 'New York, USA',
-            startLat: '40.7128', startLon: '-74.0060',
-            endName: 'Boston, USA',
-            endLat: '42.3601', endLon: '-71.0589'
-          })} className="btn-example">
-            New York to Boston
-          </button>
-          <button onClick={() => useExampleRoute({
-            startName: 'London, UK',
-            startLat: '51.5074', startLon: '-0.1278',
-            endName: 'Paris, France',
-            endLat: '48.8566', endLon: '2.3522'
-          })} className="btn-example">
-            London to Paris
-          </button>
-          <button onClick={() => useExampleRoute({
-            startName: 'San Francisco, USA',
-            startLat: '37.7749', startLon: '-122.4194',
-            endName: 'Los Angeles, USA',
-            endLat: '34.0522', endLon: '-118.2437'
-          })} className="btn-example">
-            San Francisco to Los Angeles
-          </button>
+        {/* examples removed per request */}
+
+        {error && <div className={styles.error} role="alert">{error}</div>}
+        {success && <div className={styles.success} role="status">{success}</div>}
+        {loading && (
+          <div className={styles.loading} role="status">
+            <Skeleton height={16} style={{ marginBottom: 8 }} />
+            <Skeleton height={14} width="60%" />
+          </div>
+        )}
+      </Card>
+      {routeData && <div className={styles.timelineWrapper}><Timeline segments={routeData.segments} /></div>}
+
+        </div>
+        <div className={styles.mapWrapper}>
+          <MapView routeData={routeData} />
         </div>
       </div>
-
-      {recommendation && (
-        <div className="recommendation-panel">
-          <h3>Best Departure Time</h3>
-          <div className="recommendation-card">
-            <p className="rec-time">
-              {new Date(recommendation.best_departure.departure_time).toLocaleString()}
-            </p>
-            <p className={`rec-risk ${recommendation.best_departure.risk_level}`}>
-              Risk Level: {recommendation.best_departure.risk_level}
-            </p>
-            <p className="rec-score">
-              Risk Score: {recommendation.best_departure.average_risk}
-            </p>
-          </div>
-        </div>
-      )}
+      {routeData && <AlertsPanel segments={routeData.segments} />}
     </div>
   );
 }

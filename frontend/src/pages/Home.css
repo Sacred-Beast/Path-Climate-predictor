@@ -210,3 +210,18 @@ input:focus {
   color: #065f46;
   border: 1px solid #bbf7d0;
 }
+
+.input-section { padding: 1rem; }
+.btnPrimary { margin-top: 0.5rem; }
+.mapAndAlerts { display: flex; gap: 1rem; flex-direction: column; }
+.mapWrapper { width: 100%; height: 400px; }
+.examplesGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+.error { color: #b91c1c; background: #fee2e2; padding: 0.5rem; border-radius: 0.5rem; margin-top: 0.75rem; }
+.success { color: #065f46; background: #ecfdf5; padding: 0.5rem; border-radius: 0.5rem; margin-top: 0.75rem; }
+.loading { color: #1e3a8a; background: #eff6ff; padding: 0.5rem; border-radius: 0.5rem; margin-top: 0.75rem; }
+
+@media (min-width: 900px) {
+  .mapAndAlerts { flex-direction: row; }
+  .mapWrapper { flex: 2; }
+  .input-section { flex: 1; }
+}
