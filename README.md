@@ -134,4 +134,4 @@ The application works offline using cached data and can be installed as a native
 
 ## License
 
-MIT License
+Apache 2.0 License
